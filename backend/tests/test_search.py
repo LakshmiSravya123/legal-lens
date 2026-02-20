@@ -1,19 +1,18 @@
 """Tests for search and chat endpoints."""
 
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 
 async def test_search(client):
     """Search returns results."""
     mock_results = [
         MagicMock(
+            document_id="doc-1",
             text="Indemnification clause found",
             document_name="contract.pdf",
             page=3,
             paragraph=1,
             score=0.85,
-            confidence="high",
         ),
     ]
     with patch("backend.routers.search.semantic_search", return_value=mock_results):
@@ -50,7 +49,7 @@ async def test_chat(client):
     with patch("backend.routers.chat.ask_with_follow_ups", new_callable=AsyncMock) as mock_ask:
         mock_ask.return_value = (
             "The indemnification clause states...",
-            [{"document": "contract.pdf", "page": 3, "text": "snippet"}],
+            [{"document_id": "doc-1", "document_name": "contract.pdf", "page": 3, "paragraph": None, "text": "snippet", "score": 0.9}],
             ["What are the exceptions?"],
         )
         with patch("backend.routers.chat.get_llm_manager"):
